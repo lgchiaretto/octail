@@ -33,7 +33,7 @@ func main() {
 		kubeContext string
 		kubeconfig  string
 		labels      string
-		namespace   string
+		project     string
 		timestamps  bool
 		version     bool
 	)
@@ -43,11 +43,10 @@ func main() {
 		flags.PrintDefaults()
 	}
 
-	flags.StringVar(&kubeContext, "context", "", "Kubernetes context")
 	flags.BoolVar(&debug, "debug", false, "Debug mode using pprof (http://localhost:6060)")
 	flags.StringVar(&kubeconfig, "kubeconfig", "", "Path of kubeconfig")
 	flags.StringVarP(&labels, "labels", "l", "", "Label filter query")
-	flags.StringVarP(&namespace, "namespace", "n", "", "Kubernetes namespace")
+	flags.StringVarP(&project, "project", "p", "", "Openshift project")
 	flags.BoolVarP(&timestamps, "timestamps", "t", false, "Include timestamps on each line")
 	flags.BoolVarP(&version, "version", "v", false, "Print version")
 
@@ -105,11 +104,13 @@ func main() {
 		currentContext = kubeContext
 	}
 
-	if namespace == "" {
+	var cluster = rawConfig.Contexts[currentContext].Cluster
+
+	if project == "" {
 		if rawConfig.Contexts[currentContext].Namespace == "" {
-			namespace = metav1.NamespaceDefault
+			project = metav1.NamespaceDefault
 		} else {
-			namespace = rawConfig.Contexts[currentContext].Namespace
+			project = rawConfig.Contexts[currentContext].Namespace
 		}
 	}
 
@@ -117,9 +118,9 @@ func main() {
 	signal.Notify(sigCh, os.Interrupt)
 
 	logger := NewLogger()
-	logger.PrintHeader(currentContext, namespace, labels)
+	logger.PrintHeader(cluster, project, labels)
 
-	watcher, err := clientset.CoreV1().Pods(namespace).Watch(metav1.ListOptions{
+	watcher, err := clientset.CoreV1().Pods(project).Watch(metav1.ListOptions{
 		LabelSelector: labels,
 	})
 	if err != nil {
