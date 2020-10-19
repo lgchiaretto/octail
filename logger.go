@@ -38,7 +38,7 @@ func (l *Logger) PrintColorizedLog(c *color.Color, line string) {
 
 // PrintHeader prints header
 func (l *Logger) PrintHeader(context, project, labels string) {
-	fmt.Printf("%s %s\n", boldFunc("Context:  "), context)
+	fmt.Printf("%s %s\n", boldFunc("Cluster:  "), context)
 	fmt.Printf("%s %s\n", boldFunc("Project:"), project)
 	if labels != "" {
 		fmt.Printf("%s %s\n", boldFunc("Labels:   "), labels)
